@@ -1,16 +1,28 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error,r2_score,mean_absolute_error
-from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, classification_report,confusion_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import SVC
 
-df=pd.read_csv("data.csv")
-print(df.head())
+data=pd.read_csv("spam.csv")
+data['Category']=data['Category'].map({'ham':0,'spam':1})
 
-X=df[["bedrooms,bathrooms,sqft_living,floors,view,yr_built"]]
-y=["price"]
-X_train,X_test,y_test,y_train=train_test_split(X,y,test_size=0.2,random_State=42)
+X=data['Message']
+Y=data['Category']
 
-model=LinearRegression()
-model.fit(X_train,X_test)
-y_pred=model.predict(X_test)
+vectorizer=TfidfVectorizer(stop_words='english')
+X=vectorizer.fit_transform(X)
+
+X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2,random_state=42)
+model=SVC(kernel='linear')
+model.fit(X_train,Y_train)
+Y_pred=model.predict(X_test)
+
+print("\nAccuracy: ",accuracy_score(Y_test,Y_pred))
+print("\nConfusion Matrix:")
+print(confusion_matrix(Y_test, Y_pred))
+
+print("\nClassification Report:")
+print(classification_report(Y_test, Y_pred))
+
+
